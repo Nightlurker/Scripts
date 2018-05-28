@@ -68,6 +68,8 @@ Process
             if ($Check.Result -ne "Passed") {
                 Write-Log -Message ("Replication Health " + $Check.Check + ": " + $Check.Result) -Level "Error" -Path $LogFile
                 $ErrorFound = $true
+            } else {
+                Write-Log -Message ("Replication Health " + $Check.Check + ": " + $Check.Result) -Level "Info" -Path $LogFile
             }
         }
     }
