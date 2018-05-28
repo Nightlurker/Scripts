@@ -47,7 +47,18 @@ Process
 {
     Write-Log -Message "Starting Process Block of CheckSMTPQueues.ps1" -Level "Info" -Path $LogFile
 
-    #Get-Queue
+    #Checking the queues on all Exchange servers
+    $ExchangeServer = Get-ExchangeServer
+
+    foreach ($Server in $ExchangeServer) {
+        Write-Log -Message ("Checking SMTP Queue for: " + $Server.Name) -Level "Info" -Path $LogFile
+        foreach ($Queue in (Get-Queue -Server $Server.Name)) {
+            if ($Queue.MessageCount -ge $Config.Limits.Queue) {
+                Write-Log -Message ("The queue " + $Queue.Identity + " is larger than the limit of " + $Config.Limits.Queue) -Level "Error" -Path $LogFile
+                $ErrorFound = $true
+            }
+        }
+    }
 
     if ($ErrorFound) {
         Write-Log -Message "Error(s) detected, please check and resolve the faults found" -Level "Error" -Path $LogFile
