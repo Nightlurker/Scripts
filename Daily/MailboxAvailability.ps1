@@ -47,36 +47,17 @@ Process
 {
     Write-Log -Message "Starting Process Block of MailboxAvailability.ps1" -Level "Info" -Path $LogFile
 
-    Get-MailboxDatabase -Identity DB01 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB02 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB03 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB04 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB05 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB06 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB07 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB08 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB09 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB10 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB11 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB12 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB13 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB14 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB15 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB16 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB17 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB18 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB19 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB20 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB21 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB22 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB23 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB24 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB25 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB26 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB27 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB28 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB29 -status |Fortmat-List mounted
-    Get-MailboxDatabase -Identity DB30 -status |Fortmat-List mounted
+    $MailboxDatabase = Get-MailboxDatabase -Status
+
+    foreach ($Database in $MailboxDatabase) {
+        Write-Log -Message ("Checking Mailboxdatabase status for: " + $Database.Name) -Level "Info" -Path $LogFile
+        if ($Database.Mounted -ne $true) {
+            Write-Log -Message ("Database " + $Database.Name + " is not mounted!") -Level "Error" -Path $LogFile
+            $ErrorFound = $true
+        } else {
+            Write-Log -Message ("Database " + $Database.Name + " is mounted.") -Level "Info" -Path $LogFile
+        }
+    }
 
     if ($ErrorFound) {
         Write-Log -Message "Error(s) detected, please check and resolve the faults found" -Level "Error" -Path $LogFile
