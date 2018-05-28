@@ -1,0 +1,1 @@
+Get-ServerHealth -Server "CAS or MBX Server" | where { $_.healthsetname -eq "OWA.Protocol" }

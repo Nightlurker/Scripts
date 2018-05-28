@@ -1,0 +1,1 @@
+# New-DeliveryAgentConnector -Name "Contoso X.400 Connector" -AddressSpaces "X400:c=US;a=Fabrikam;p=Contoso;1" -DeliveryProtocol "X.400" -SourceTransportServers Hub01,Hub02,Hub05

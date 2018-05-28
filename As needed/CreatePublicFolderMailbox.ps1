@@ -1,0 +1,1 @@
+New-Mailbox -PublicFolder -Name MasterHierarchy

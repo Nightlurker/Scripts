@@ -1,0 +1,4 @@
+{
+    "ExchangeServer": "ExchangeServer",
+    "ExchangeSessionURI": "http://ExchangeServer/PowerShell"
+}
