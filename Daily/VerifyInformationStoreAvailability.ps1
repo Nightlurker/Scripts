@@ -47,7 +47,17 @@ Process
 {
     Write-Log -Message "Starting Process Block of VerifyInformationStoreAvailability.ps1" -Level "Info" -Path $LogFile
 
-    Get-Mailboxserver  test-mapiconnectivity
+    $ExchangeServer = Get-ExchangeServer
+
+    foreach ($Server in $ExchangeServer) {
+        Write-Log -Message ("Checking Information Store availability for: " + $Server.Name) -Level "Info" -Path $LogFile
+        foreach ($MapiTest in (Test-MAPIConnectivity -Server $Server.Name)) {
+            if ($MapiTest.Result -ne "Success") {
+                Write-Log -Message ("Information Store availability failed on " + $Server.Name + " for: " + $MapiTest.Database) -Level "Error" -Path $LogFile
+                $ErrorFound = $true
+            }
+        }
+    }
 
     if ($ErrorFound) {
         Write-Log -Message "Error(s) detected, please check and resolve the faults found" -Level "Error" -Path $LogFile
