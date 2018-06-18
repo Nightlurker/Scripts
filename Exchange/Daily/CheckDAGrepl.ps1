@@ -50,10 +50,10 @@ Process
 
     # Checking for Database Copy errors
     $MailboxDatabase = Get-MailboxDatabase
-    $MailboxDatabaseCopyStatus = $MailboxDatabase | Get-MailboxDatabaseCopyStatus | Format-List
+    $MailboxDatabaseCopyStatus = $MailboxDatabase | Get-MailboxDatabaseCopyStatus
 
     foreach ($DatabaseCopyStatus in $MailboxDatabaseCopyStatus) {
-        if (($DatabaseCopyStatus.Status -ne "Mounted") -or ($DatabaseCopyStatus.Status -ne "Healthy")) {
+        if ($DatabaseCopyStatus.Status -notin ("Mounted", "Healthy")) {
             Write-Log -Message ("Database Copy Status of " + $DatabaseCopyStatus.Name + ": " + $DatabaseCopyStatus.Status) -Level "Error" -Path $LogFile
             $ErrorFound = $true
         }
@@ -86,4 +86,5 @@ Process
 End
 {
     Remove-PSSession -Session $ExchangeSession
+    Remove-Module -Name Write-Log
 }
