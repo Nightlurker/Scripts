@@ -1,0 +1,1 @@
+# Get-MailboxStatistics | where { $_.DisconnectDate -ne $null } | select mailboxGuid,databasename | foreach-object -process {remove-mailbox -database $_.databasename - $_.mailboxGuid}
