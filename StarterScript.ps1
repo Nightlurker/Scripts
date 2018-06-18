@@ -9,7 +9,7 @@ Begin
     # Import Write-Log function
     try
     {
-        Import-Module ..\Write-Log.ps1 -ErrorAction Stop
+        Import-Module .\Write-Log.ps1 -ErrorAction Stop
     }
     catch
     {
