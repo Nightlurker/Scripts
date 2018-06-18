@@ -27,3 +27,7 @@ Process
     # Code
     Write-Log -Message "Ending Process Block of Mal.ps1" -Level "Info" -Path $LogFile
 }
+End
+{
+    Remove-Module -Name Write-Log
+}

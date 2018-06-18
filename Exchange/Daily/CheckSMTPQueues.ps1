@@ -72,4 +72,5 @@ Process
 End
 {
     Remove-PSSession -Session $ExchangeSession
+    Remove-Module -Name Write-Log
 }
