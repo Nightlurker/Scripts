@@ -50,7 +50,7 @@ Process {
 
     foreach ($Server in $ExchangeServer) {
         Write-Log -Message ("Checking OWA Health for: " + $Server.Name) -Level "Info" -Path $LogFile
-        foreach ($OwaHealth in (Get-ServerHealth -Identity $Server.Name -HealthSetName "OWA.Protocol")) {
+        foreach ($OwaHealth in (Get-ServerHealth -Identity $Server.Name -HealthSet "OWA.Protocol")) {
             if ($OwaHealth.AlertValue -ne "Healthy") {
                 Write-Log -Message ("Non-healthy OWA protocol found: " + $OwaHealth.Name) -Level "Error" -Path $LogFile
                 $ErrorFound = $true
