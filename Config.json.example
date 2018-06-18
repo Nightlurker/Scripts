@@ -2,6 +2,7 @@
     "ExchangeServer": "ExchangeServer",
     "ExchangeSessionURI": "http://ExchangeServer/PowerShell",
     "Limits" : {
-        "Queue" : 100
+        "Queue" : 100,
+        "LastFullBackup" : 1
     }
 }
