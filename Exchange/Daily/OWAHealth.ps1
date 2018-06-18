@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-   Description of the script
+   Checks if the OWA service is running
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param()

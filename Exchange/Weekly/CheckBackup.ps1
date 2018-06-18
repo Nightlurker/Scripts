@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-   Description of the script
+   Checks if the last full backup is within the limits configured
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param()

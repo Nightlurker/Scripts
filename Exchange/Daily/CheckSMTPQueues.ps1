@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-   Description of the script
+   Checks that all the SMTP queues on Exchange servers are bellow the configured limit
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()

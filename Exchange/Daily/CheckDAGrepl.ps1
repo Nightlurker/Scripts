@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-   Description of the script
+   Checks the replication status of a DAG cluster
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()

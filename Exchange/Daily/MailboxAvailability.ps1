@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-   Description of the script
+   Checks if all the mailbox databases are available
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()

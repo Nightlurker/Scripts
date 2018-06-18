@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-   Description of the script
+   Checks the running Exchange Services on all Exchange servers
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()

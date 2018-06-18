@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-   Description of the script
+   Tests the MAPI Connectivity
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
 param()
