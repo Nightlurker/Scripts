@@ -11,7 +11,7 @@ Begin
         if (-not (Test-Path $PSScriptRoot\..\Config.json)) {
             Throw [System.IO.FileNotFoundException]
         }
-        $Config = Get-Content -Path $PSScriptRoot\..\Config.json | ConvertFrom-Json
+        $Config = Get-Content -Path $PSScriptRoot\..\Config.json -Raw | ConvertFrom-Json
     }
     catch {
         Write-Error -Message "Could not find a config file"
