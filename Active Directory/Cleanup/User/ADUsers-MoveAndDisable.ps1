@@ -21,7 +21,7 @@ Begin
     # Import Find-ADUserByLoginDate function
     try
     {
-        .\Find-ADUserByLoginDate.ps1 -ErrorAction Stop
+        Import-Module .\Find-ADUserByLoginDate.ps1 -ErrorAction Stop
     }
     catch
     {
@@ -53,7 +53,7 @@ Process
     {
         Write-Log -Message ("Starting processing on OU: " + $OU) -Level Info -Path $LogFile
 
-        $Users = Find-ADUserByLoginDate -DaysSinceLogin $UserLoginAge -OU $OU
+        $Users = Find-ADUserByLoginDate -DaysSinceLogin $UserLoginAge -OU $OU -IncludeNoLogonDate
 
         Write-Log -Message ("Found " + $Users.Count + " users to be moved and disabled") -Level Info -Path $LogFile
         

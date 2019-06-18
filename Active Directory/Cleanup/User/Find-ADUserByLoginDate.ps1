@@ -23,7 +23,12 @@ function Find-ADUserByLoginDate
         # Path of OU to search in.
         [parameter(Mandatory=$false, HelpMessage="Define path of OU to search.")]
         [ValidateNotNullOrEmpty()]
-        [string]$OU = [System.String]::Empty
+        [string]$OU = [System.String]::Empty,
+
+        # Include users with no last logon?
+        [parameter(Mandatory=$false, HelpMessage="Include users without lastLogonDate?")]
+        [ValidateSet($true, $false)]
+        [switch]$IncludeNoLogonDate = $false
     )
 
     Begin
@@ -63,7 +68,11 @@ function Find-ADUserByLoginDate
     {
         try
         {
-            $Users = Get-ADUser -Properties Name,lastLogonDate -Filter {lastLogonDate -lt $DateObjectForFilter} -SearchBase $OU -ErrorAction Stop
+            if ($IncludeNoLogonDate -eq $false) {
+                $Users = Get-ADUser -Properties Name,lastLogonDate -Filter {lastLogonDate -lt $DateObjectForFilter} -SearchBase $OU -ErrorAction Stop
+            } else {
+                $Users = Get-ADUser -Properties Name,lastLogonDate -Filter {(lastLogonDate -lt $DateObjectForFilter) -or (-not (lastLogonDate -like '*'))} -SearchBase $OU -ErrorAction Stop
+            }
         }
         catch
         {
