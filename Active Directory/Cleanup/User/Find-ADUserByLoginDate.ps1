@@ -28,7 +28,12 @@ function Find-ADUserByLoginDate
         # Include users with no last logon?
         [parameter(Mandatory=$false, HelpMessage="Include users without lastLogonDate?")]
         [ValidateSet($true, $false)]
-        [switch]$IncludeNoLogonDate = $false
+        [switch]$IncludeNoLogonDate = $false,
+
+        # Which DC to use
+        [parameter(Mandatory=$false, HelpMessage="Which DC to use for the query.")]
+        [ValidateNotNullOrEmpty()]
+        [string]$Server = [System.String]::Empty
     )
 
     Begin
@@ -68,11 +73,23 @@ function Find-ADUserByLoginDate
     {
         try
         {
-            if ($IncludeNoLogonDate -eq $false) {
-                $Users = Get-ADUser -Properties Name,lastLogonDate -Filter {lastLogonDate -lt $DateObjectForFilter} -SearchBase $OU -ErrorAction Stop
-            } else {
-                $Users = Get-ADUser -Properties Name,lastLogonDate -Filter {(lastLogonDate -lt $DateObjectForFilter) -or (-not (lastLogonDate -like '*'))} -SearchBase $OU -ErrorAction Stop
+            $Arguments = @{
+                Properties = "Name","lastLogonDate"
+                SearchBase = $OU
+                ErrorAction = "Stop"
             }
+
+            if ($Server -ne [System.String]::Empty) {
+                $Arguments.Add("Server", $Server)
+            }
+
+            if ($IncludeNoLogonDate -eq $false) {
+                $Arguments.Add("Filter", {lastLogonDate -lt $DateObjectForFilter})
+            } else {
+                $Arguments.Add("Filter", {(lastLogonDate -lt $DateObjectForFilter) -or (-not (lastLogonDate -like '*'))})
+            }
+
+            $Users = Get-ADUser @Arguments
         }
         catch
         {
