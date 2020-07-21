@@ -23,7 +23,12 @@ function Find-ADComputerByLoginDate
         # Path of OU to search in.
         [parameter(Mandatory=$false, HelpMessage="Define path of OU to search.")]
         [ValidateNotNullOrEmpty()]
-        [string]$OU = [System.String]::Empty
+        [string]$OU = [System.String]::Empty,
+
+        # Which DC to use
+        [parameter(Mandatory=$false, HelpMessage="Which DC to use for the query.")]
+        [ValidateNotNullOrEmpty()]
+        [string]$Server = [System.String]::Empty
     )
 
     Begin
@@ -63,7 +68,18 @@ function Find-ADComputerByLoginDate
     {
         try
         {
-            $Computers = Get-ADComputer -Properties Name,lastLogonDate -Filter {lastLogonDate -lt $DateObjectForFilter} -SearchBase $OU -ErrorAction Stop
+            $Arguments = @{
+                Properties = "Name","lastLogonDate"
+                Filter = {lastLogonDate -lt $DateObjectForFilter}
+                SearchBase = $OU
+                ErrorAction = "Stop"
+            }
+
+            if ($Server -ne [System.String]::Empty) {
+                $Arguments.Add("Server", $Server)
+            }
+
+            $Computers = Get-ADComputer @Arguments
         }
         catch
         {
