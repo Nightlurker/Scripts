@@ -3,7 +3,12 @@
    Sets the default permission on all user calendars in Exchange to LimitedDetails
 #>
 [CmdletBinding(SupportsShouldProcess=$true)]
-param()
+param(
+    # Permission to set on calendar 
+    [parameter(Mandatory=$false, HelpMessage="Permission to set on calendar.")]
+    [ValidateNotNullOrEmpty()]
+    [string]$Permission = "LimitedDetails"
+)
 Begin
 {
     # Import Write-Log function
@@ -24,10 +29,7 @@ Begin
 
     # Import Exchange Session
     try {
-        if (-Not (Get-PSSession | Where-Object {$_.ConfigurationName -eq "Microsoft.Exchange" -and $_.State -eq "Opened"})) {
-            $ExchangeSession = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri $Config.ExchangeSessionURI -Authentication Kerberos
-            Import-PSSession -Session $ExchangeSession
-        }
+        Connect-ExchangeOnline
     }
     catch {
         Write-Error -Message "Could not import Exchange Session."
@@ -38,27 +40,27 @@ Process
 {
     Write-Log -Message "Starting Process Block of SetDefaultCalendarPermissions.ps1" -Level "Info" -Path $LogFile
 
-    $Mailboxes = Get-Mailbox -ResultSize Unlimited -RecipientTypeDetails UserMailbox
+    $Mailboxes = Get-EXOMailbox -ResultSize Unlimited -Filter "(RecipientType -eq 'UserMailbox') -and (RecipientTypeDetails -eq 'UserMailbox')"
 
     foreach ($Mailbox in $Mailboxes) {
-        $CalendarFolder = ($Mailbox.Identity + ":\" + (Get-MailboxFolderStatistics -Identity $Mailbox.Identity -FolderScope Calendar | Where-Object FolderType -eq Calendar).FolderPath.TrimStart("/"))
+        Write-Log -Message ("Finding calendar folder for $($Mailbox.Identity)") -Level "Info" -Path $LogFile
+        $CalendarFolder = ($Mailbox.Identity + ":\" + (Get-EXOMailboxFolderStatistics -Identity $Mailbox.Identity -FolderScope Calendar | Where-Object FolderType -eq Calendar).FolderPath.TrimStart("/"))
 
-        Write-Log -Message ("Checking permissions for folder " + $CalendarFolder) -Level "Info" -Path $LogFile
+        Write-Log -Message ("Checking permissions for folder $($CalendarFolder)") -Level "Info" -Path $LogFile
+        $AccessRights = (Get-EXOMailboxFolderPermission -Identity $CalendarFolder -User Default -ErrorAction SilentlyContinue).AccessRights
 
-        if ((Get-MailboxFolderPermission -Identity $CalendarFolder -User Default -ErrorAction SilentlyContinue).AccessRights -ne "LimitedDetails") {
-            Write-Log -Message ("Mailbox " + $Mailbox.Identity + " does not have access right LimitedDetails for default user, changing.") -Level "Warn" -Path $LogFile
-            Set-MailboxFolderPermission -Identity $CalendarFolder -User Default -AccessRights LimitedDetails
+        if ($AccessRights -ne $Permission) {
+            Write-Log -Message ("Mailbox $($Mailbox.Identity) has access right $($AccessRights) for default user, changing to $($Permission).") -Level "Info" -Path $LogFile
+            Set-MailboxFolderPermission -Identity $CalendarFolder -User Default -AccessRights $Permission
             $ChangeCount++
         }
     }
 
-    Write-Log -Message ("Changed a total of " + $Count + " calendar permissions") -Level "Info" -Path $LogFile
+    Write-Log -Message ("Changed a total of $($ChangeCount) calendar permissions") -Level "Info" -Path $LogFile
     Write-Log -Message "Ending Process Block of SetDefaultCalendarPermissions.ps1" -Level "Info" -Path $LogFile
 }
 End
 {
-    if (Get-Variable -Name "ExchangeSession" -Scope Global -ErrorAction SilentlyContinue) {
-        Remove-PSSession -Session $ExchangeSession
-    }
+    Disconnect-ExchangeOnline
     Remove-Module -Name Write-Log
 }
