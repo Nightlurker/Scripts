@@ -51,7 +51,7 @@ Process
 
         if ($AccessRights) {
             Write-Log -Message ("Mailbox $($Mailbox.Identity) has access right $($AccessRights) for $($User), removing.") -Level "Info" -Path $LogFile
-            Remove-MailboxFolderPermission -Identity $CalendarFolder -User $User -Force
+            Remove-MailboxFolderPermission -Identity $CalendarFolder -User $User -Confirm:$false
             $ChangeCount++
         }
     }
@@ -61,6 +61,6 @@ Process
 }
 End
 {
-    Disconnect-ExchangeOnline
+    Disconnect-ExchangeOnline -Confirm:$false
     Remove-Module -Name Write-Log
 }
