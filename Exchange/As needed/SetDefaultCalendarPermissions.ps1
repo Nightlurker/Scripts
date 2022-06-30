@@ -7,14 +7,18 @@ param(
     # Permission to set on calendar 
     [parameter(Mandatory=$false, HelpMessage="Permission to set on calendar.")]
     [ValidateNotNullOrEmpty()]
-    [string]$Permission = "LimitedDetails"
+    [string]$Permission = "LimitedDetails",
+
+    # What mailboxes to ignore
+    [Parameter(Mandatory=$false, HelpMessage="What mailboxes to ignore")]
+    [string[]]$IgnoreMailboxes
 )
 Begin
 {
     # Import Write-Log function
     try
     {
-        Import-Module .\Write-Log.ps1 -ErrorAction Stop
+        Import-Module ..\Write-Log.ps1 -ErrorAction Stop
     }
     catch
     {
@@ -43,17 +47,22 @@ Process
     $Mailboxes = Get-EXOMailbox -ResultSize Unlimited -Filter "(RecipientType -eq 'UserMailbox') -and (RecipientTypeDetails -eq 'UserMailbox')"
 
     foreach ($Mailbox in $Mailboxes) {
-        Write-Log -Message ("Finding calendar folder for $($Mailbox.Identity)") -Level "Info" -Path $LogFile
-        $CalendarFolder = ($Mailbox.Identity + ":\" + (Get-EXOMailboxFolderStatistics -Identity $Mailbox.Identity -FolderScope Calendar | Where-Object FolderType -eq Calendar).FolderPath.TrimStart("/"))
+        if ($IgnoreMailboxes -Contains $Mailbox.PrimarySmtpAddress.toString()) {
+            Write-Log -Message ("Mailbox $($Mailbox.Identity) in ignore list, skipping.") -Level "Info" -Path $LogFile
+        } else {
+            Write-Log -Message ("Finding calendar folder for $($Mailbox.Identity)") -Level "Info" -Path $LogFile
+            $CalendarFolder = ($Mailbox.Identity + ":\" + (Get-EXOMailboxFolderStatistics -Identity $Mailbox.Identity -FolderScope Calendar | Where-Object FolderType -eq Calendar).FolderPath.TrimStart("/"))
 
-        Write-Log -Message ("Checking permissions for folder $($CalendarFolder)") -Level "Info" -Path $LogFile
-        $AccessRights = (Get-EXOMailboxFolderPermission -Identity $CalendarFolder -User Default -ErrorAction SilentlyContinue).AccessRights
+            Write-Log -Message ("Checking permissions for folder $($CalendarFolder)") -Level "Info" -Path $LogFile
+            $AccessRights = (Get-EXOMailboxFolderPermission -Identity $CalendarFolder -User Default -ErrorAction SilentlyContinue).AccessRights
 
-        if ($AccessRights -ne $Permission) {
-            Write-Log -Message ("Mailbox $($Mailbox.Identity) has access right $($AccessRights) for default user, changing to $($Permission).") -Level "Info" -Path $LogFile
-            Set-MailboxFolderPermission -Identity $CalendarFolder -User Default -AccessRights $Permission
-            $ChangeCount++
+            if ($AccessRights -ne $Permission) {
+                Write-Log -Message ("Mailbox $($Mailbox.Identity) has access right $($AccessRights) for default user, changing to $($Permission).") -Level "Info" -Path $LogFile
+                Set-MailboxFolderPermission -Identity $CalendarFolder -User Default -AccessRights $Permission
+                $ChangeCount++
+            }
         }
+        
     }
 
     Write-Log -Message ("Changed a total of $($ChangeCount) calendar permissions") -Level "Info" -Path $LogFile
